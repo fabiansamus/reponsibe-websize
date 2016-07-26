@@ -1,52 +1,33 @@
 import webapp2
-import cgi
-import logging
+import os
+import jinja2
 
-form="""
-<form method="post">
-	Enter some text to ROT13
-	<br>
-	<label>
-	<textarea name="text" style="height: 100px; width:400px;">%(text)s</textarea>
-	</label>
-	<br>
-	<input type="submit">
-</form>
-"""
-def rot13(new_text):
-    lista=""
-    for i in new_text:
-            if "A"< i< "M":
-                    lista +=chr(ord(i)+13)
-            elif "N" <= i<="Z":
-                    lista +=chr(ord(i)-13)
-            elif "a" <= i<="m":
-                    lista +=chr(ord(i)+13)
-            elif "n" <= i<="z":
-                    lista +=chr(ord(i)-13)
-            else:
-                    lista +=i
-    texto = cgi.escape(lista, quote=True)
-    return  texto
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
 
-class MainPage(webapp2.RequestHandler):
-	def write_form(self, text=""):
-		self.response.out.write(form % {"text":text})
 
+class Handler(webapp2.RequestHandler):
+	def write(self, *a, **kw):
+		self.response.out.write(*a, **kw)
+
+	def render_str(self, template, **params):
+		t =jinja_env.get_template(template)
+		return t.render(params)
+
+	def render(self, template, **kw):
+		self.write(self.render_str(template, **kw))
+
+class MainPage(Handler):
 	def get(self):
-		self.write_form()
+		items=self.request.get_all("food")
+		self.render("shopping_list.html",items = items)
 
-	def post(self):
-		new_text = self.request.get('text')
-		text= rot13(new_text)
-		self.write_form(text)
-
+class FizzBuzzHandler(Handler):
+	def get(self):
+		n= self.request.get("n",0)
+		n= n and int(n)
+		self.render('fizzbuzz.html',n=n)
 	
-
-	
-
 		
 
-
-app = webapp2.WSGIApplication([('/', MainPage)],debug=True)
-
+app = webapp2.WSGIApplication([('/', MainPage),('/fizzbuzz',FizzBuzzHandler)],debug=True)
