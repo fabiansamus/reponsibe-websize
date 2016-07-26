@@ -1,0 +1,74 @@
+&amp;= &amp;amp;
+> &gt;
+< &lt;
+" &quot;
+& &amp;
+<form method="post">
+	Enter some text to ROT13
+	<br>
+	<textarea type="text" name="info" style="height: 100px; width:400px;">
+	</textarea>
+	<br>
+	<input type="submit" name="submit">
+</form>
+<ol>
+{% for x in range(1,n+1) %}
+	<li>
+	{% if x % 3 == 0 %}
+		Fizz
+	{% elif x % 5 == 0 %}
+		Buzz
+	{% elif x % 15 == 0 %}
+		FizzBuzz
+	{% else %}
+		{{x}}
+	<li>
+{% endfor %}
+</ol>
+def escape_html(s):
+    for (i,o)in (("&","&amp;"),(">","&gt;"),("<","&lt;"),('"',"&quote;")):
+        s=s.replace(i,o)
+    return s
+
+ self.render("name of file .html")#need to be in the same file
+
+print escape_html('>')
+print escape_html('<')
+print escape_html('"')
+print escape_html("&")
+
+import cgi
+def escape_html(s):
+	return cgi.escape(s, quote=True)
+
+<form>
+	<select name="q">
+		<option value="1">the number one</option>
+		<option>tow</option>
+		<option>three</option>
+	</select>
+	<br>
+	<input type="submit">	
+</form>
+
+
+
+
+<form>
+<label>
+one
+	<input type="radio" name="q" value="one">
+	</label>
+<label>	
+two
+	<input type="password" name="r" value=""></label>
+<label>	
+three
+	<input type="checkbox" name="t" value="three"></label>
+	<br>
+	<input type="submit">
+</form>
+
+password
+radio 
+chekbox
