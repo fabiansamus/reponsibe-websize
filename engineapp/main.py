@@ -1,9 +1,26 @@
 import webapp2
 import os
 import jinja2
+from google.appengine.ext import db
+import hashlib
+import hmac
 
+SECRET = 'imsosecret'
+def hash_str(s):
+    ###Your code here
+    return hmac.new(SECRET,s).hexdigest()
+
+def make_secure_val(s):
+    return "%s|%s" % (s, hash_str(s))
+
+def check_secure_val(h):
+    val = h.split('|')[0]
+    if h == make_secure_val(val):
+        return val
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
+
+
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
 
 
 class Handler(webapp2.RequestHandler):
@@ -16,32 +33,27 @@ class Handler(webapp2.RequestHandler):
 
 	def render(self, template, **kw):
 		self.write(self.render_str(template, **kw))
-
-class Art(db.Model):
-	title=db.StringProperty(required=True)
-	art=db.TextProperty(required=True)
-	created=db.DateTimeProperty(auto_now_add=True)
 		
 
 class MainPage(Handler):
-	def render_front(self, title="", art="", error=""):
-		art= db.GqlQuery("")
-		self.render("front.html",title=title,art=art,error=error)
 	def get(self):
-		self.render_front()
-	def pos(self):
-		title= self.request.get("title")
-		art= self.request.get("art")
+		self.response.headers['Content-Tupe']='texture/plain'
+		visit=0
+		visit_cookie_str=self.request.cookies.get('visit')
+		if visit_cookie_str:
+			cookie_val=check_secure_val(visit_cookie_str)
+			if cookie_val:
+				visit=int(cookie_val)
+		visit+=1
 
-		if title and art:
-			a=Art(title=get("title"))
-			a.put()
+		new_cookie_val= make_secure_val(str(visit))
 
-			self.redirect("/")
+		self.response.headers.add_header("Set-Cookie",'visit=%s'% new_cookie_val)
+		if visit == 10000:
+			self.wirte("you are best ever")
 		else:
-			error = "we need both a title and some artwork!"
-			self.render_front("front.html",title,art,error)
-		
+			self.write("you haven here %s times!"% visit)
+
 		
 
 app = webapp2.WSGIApplication([('/', MainPage)],debug=True)
